@@ -1,50 +1,56 @@
 #!venv/bin/python3
 import sys
 import datetime
+from typing import List
 
 
-def get_first_time(curtime, config):
-    """Accept config lines to STDIN and output the soonest time at which
+def get_first_time(curr_time: str, config: List[str]) -> List[str]:
+    """Accept simulated current time and a list of config lines, and output the soonest time at which
     each of the commands will fire and whether it is today or tomorrow."""
-    t = curtime.split(":")
-    cur_time = datetime.time(int(t[0]), int(t[1]), 00)
+
+    curr_h, curr_m = curr_time.split(":")
+    curr_time = datetime.time(int(curr_h), int(curr_m))
 
     result = []
 
     for line in config:
         if len(line) > 0:
             m, h, command = line.split()
-            execution_time = None
+
+            assert h == "*" or (0 <= int(h) < 24)
+            assert m == "*" or (0 <= int(m) < 60)
 
             if h != "*":
                 if m != "*":
-                    execution_time = datetime.time(int(h), int(m))
-                    execution_day = "today" if execution_time >= cur_time else "tomorrow"
-                else:
-                    h = int(h)
-                    execution_day = "today" if h >= cur_time.hour else "tomorrow"
-                    m = cur_time.minute if h == cur_time.hour else 0
+                    exec_h = int(h)
+                    exec_m = int(m)
 
+                    exec_day = "today" if datetime.time(exec_h, exec_m) >= curr_time else "tomorrow"
+                else:
+                    exec_h = int(h)
+                    exec_m = curr_time.minute if exec_h == curr_time.hour else 0
+                    exec_day = "today" if exec_h >= curr_time.hour else "tomorrow"
             else:
                 if m != "*":
-                    m = int(m)
-                    if m >= cur_time.minute:
-                        h = cur_time.hour
-                        execution_day = "today"
+                    exec_m = int(m)
+                    if exec_m >= curr_time.minute:
+                        exec_h = curr_time.hour
+                        exec_day = "today"
                     else:
-                        h = cur_time.hour + 1 if cur_time.hour < 23 else 0
-                        execution_day = "tomorrow" if cur_time.hour >= 23 else "today"
+                        exec_h = curr_time.hour + 1 if curr_time.hour < 23 else 0
+                        exec_day = "tomorrow" if curr_time.hour >= 23 else "today"
                 else:
-                    h, m = cur_time.hour, cur_time.minute
-                    execution_day = "today"
+                    exec_h, exec_m = curr_time.hour, curr_time.minute
+                    exec_day = "today"
 
-            execution_time = execution_time if execution_time else datetime.time(h, m)
-            result.append(f"{int(execution_time.hour)}:{execution_time:%M} {execution_day} - {command}")
+            exec_time = datetime.time(exec_h, exec_m)
+            result.append(f"{int(exec_time.hour)}:{exec_time:%M} {exec_day} - {command}")
 
-    for res in result:
-        print(res)
     return result
 
 
 if __name__ == "__main__":
-    get_first_time(sys.argv[1], sys.stdin)
+    inp = sys.stdin.readlines()
+    results: List[str] = get_first_time(sys.argv[1], inp)
+    for res in results:
+        print(res)
