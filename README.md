@@ -9,7 +9,8 @@ source venv/bin/activate
 
 To run the code, issue the following command:
 ```
-./main.py HH:MM < config.txt
+./main.py HH:MM < config
+# example: ./main.py 23:10 < config
 ```
 
 To run the test, initiate:
