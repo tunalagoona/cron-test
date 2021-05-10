@@ -19,7 +19,7 @@ def get_first_time(curtime, config):
             if h != "*":
                 if m != "*":
                     execution_time = datetime.time(int(h), int(m))
-                    execution_day = "today" if execution_time > cur_time else "tomorrow"
+                    execution_day = "today" if execution_time >= cur_time else "tomorrow"
                 else:
                     h = int(h)
                     execution_day = "today" if h >= cur_time.hour else "tomorrow"
